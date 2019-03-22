@@ -29,12 +29,12 @@ from simtk import openmm
 
 from tensorflow.python.client import device_lib
 
-num_train_samples = 24
+num_train_samples = 8
 num_test_samples = int(0.333*num_train_samples)
 ksize = 200 # reservoir size FIXME
 batch_size = 4 # number of GPUs
 obs_steps = 4000
-train_steps = 600
+train_steps = 750000000
 
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
@@ -97,8 +97,8 @@ def initialize_system(
     total_params,
     masses,
     mol,
-    dt=0.001,
-    temperature=50):
+    dt=0.0025,
+    temperature=100):
 
     num_atoms = mol.NumAtoms()
     nrg_funcs = [
@@ -160,6 +160,7 @@ def run_once(nrgs, context, intg, x0, n_steps, total_params, ksize, inference):
     reservoir = []
 
     for step in range(n_steps):
+
         # coords = intg.get_coordinates()
         # dxdps = intg.get_dxdp()
         # reservoir.append((np.array(coords).reshape((num_atoms, 3)), np.array(dxdps).reshape((total_params, num_atoms, 3))))
@@ -172,6 +173,12 @@ def run_once(nrgs, context, intg, x0, n_steps, total_params, ksize, inference):
             if j < k:
                 coords = intg.get_coordinates()
                 dxdps = intg.get_dxdp()
+
+
+                # if step % 100 == 0:
+                print("step", step, np.amax(dxdps), np.amin(dxdps))
+
+
                 reservoir[j] = (np.array(coords).reshape((num_atoms, 3)), np.array(dxdps).reshape((total_params, num_atoms, 3)))
         context.step(inference)
 
@@ -421,8 +428,8 @@ def train_charges(train_smiles, test_smiles):
 
     for epoch in range(1000):
         print("starting epoch...", epoch, "global params", global_params.tolist())
-        iterbatches(test_args, test_offset_idxs, test_charge_idxs, test_label_confs, global_params, len(test_smiles), inference=True)
-        sklearn.utils.shuffle(train_args, train_offset_idxs, train_charge_idxs, train_label_confs)
+        # iterbatches(test_args, test_offset_idxs, test_charge_idxs, test_label_confs, global_params, len(test_smiles), inference=True)
+        # sklearn.utils.shuffle(train_args, train_offset_idxs, train_charge_idxs, train_label_confs)
         iterbatches(train_args, train_offset_idxs, train_charge_idxs, train_label_confs, global_params, len(train_smiles), inference=False)
 
 
