@@ -18,10 +18,11 @@ def match_bonds(mol, triples):
     return bond_idxs, param_idxs
 
 
-def parameterize(global_params, mol, forcefield):
+def parameterize(mol, forcefield):
+
     nrgs = []
-    pattern = "[#6X4:1]-[#6X4:2]"
-    mol = Chem.MolFromSmiles("Cc1ccccc1")
+    # pattern = "[#6X4:1]-[#6X4:2]"
+    # mol = Chem.MolFromSmiles("Cc1ccccc1")
 
     for force_group in forcefield:
         if force_group == "Bond":
