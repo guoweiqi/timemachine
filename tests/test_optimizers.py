@@ -39,7 +39,6 @@ class TestOptimizeGeometry(unittest.TestCase):
         ], dtype=onp.int32)
 
         def minimize_structure(test_params):
-
             energy_fn = functools.partial(
                 bonded.harmonic_bond,
                 params=test_params,
